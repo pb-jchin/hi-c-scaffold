@@ -8,6 +8,7 @@
 #include <sstream>
 #include <cmath>
 #include <queue>
+#include <set>
 
 #include "cmdline.h"
 
@@ -75,7 +76,8 @@ int main(int argc, char *argv[])
 	cmdline::parser p;
 	p.add<string>("alignment", 'a', "bed file for alignment", true, "");
 	p.add<string>("output", 'o', "coordinate output file", true, "");
-	p.parse_check(argc, argv);
+	p.parse_check(argc, argv);	
+	set<string> contigs;
 
 	ifstream bedfile(getCharExpr(p.get<string>("alignment")));
 	string line;
@@ -90,26 +92,26 @@ int main(int argc, char *argv[])
 			break;
 		// if(contig == "000008F")
 		// {
-		reference = contig;
-		BedRecord rec(contig,start,end,read,flag,strand);
-		if(contig_to_record.find(contig) == contig_to_record.end())
-		{
-			vector<BedRecord> recs;
-			contig_to_record[contig] =recs;
-		}
-		else
-		{
-			contig_to_record[contig].push_back(rec);
-		}
-		if(read[read.length() -1 ] == '1')
-        {
-                first_in_pair[read.substr(0,read.length()-2)] = rec;
-        }
-        else
-        {
-                second_in_pair[read.substr(0,read.length()-2)] = rec;
-    	}
-    	// }
+			contigs.insert(contig);
+			BedRecord rec(contig,start,end,read,flag,strand);
+			if(contig_to_record.find(contig) == contig_to_record.end())
+			{
+				vector<BedRecord> recs;
+				contig_to_record[contig] =recs;
+			}
+			else
+			{
+				contig_to_record[contig].push_back(rec);
+			}
+			if(read[read.length() -1 ] == '1')
+	        {
+	                first_in_pair[read.substr(0,read.length()-2)] = rec;
+	        }
+	        else
+	        {
+	                second_in_pair[read.substr(0,read.length()-2)] = rec;
+	    	}
+ 		// }
 		
 	}
 
@@ -146,17 +148,22 @@ int main(int argc, char *argv[])
 	bedfile.close();
 	cerr<<"bedfile loaded"<<endl;
 	ofstream outputfile(getCharExpr(p.get<string>("output")));
-	
-	vector<pair<long,long> > interval = intervals[reference];
-	
-	long len = interval.size();
-	for(long i = 0;i < len;i++)
+
+	for(unordered_map<string,vector<pair<long,long> > > :: iterator it = intervals.begin(); it != intervals.end(); ++it)
 	{
-		pair<long,long> curr_interval = interval.at(i);
-		double x = (curr_interval.first + curr_interval.second)/2.0;
-		double y = abs(curr_interval.first - curr_interval.second)/2.0;
-		outputfile<<x<<"\t"<<y<<endl;
-		
+		string curr_contig = it->first;
+		cerr<<curr_contig<<endl;
+		outputfile<<curr_contig<<endl;
+		vector<pair<long,long> > interval = it->second;
+		long len = interval.size();
+		for(long i = 0;i < len;i++)
+		{
+			pair<long,long> curr_interval = interval.at(i);
+			double x = (curr_interval.first + curr_interval.second)/2.0;
+			double y = abs(curr_interval.first - curr_interval.second)/2.0;
+			outputfile<<x<<"\t"<<y<<endl;
+			
+		}
 	}
 	return 0;
 }
