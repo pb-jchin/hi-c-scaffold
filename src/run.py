@@ -11,15 +11,15 @@ def main():
 
     args = parser.parse_args()
 
-    if not os.path.exists(args.dir):
-        os.makedirs(args.dir)
+    # if not os.path.exists(args.dir):
+    #     os.makedirs(args.dir)
 
-    if os.path.exists(args.dir+'/alignment_unique.bed') == False:
-        print >> sys.stderr, "convertng bam file to bed file"
-        os.system('bamToBed -i ' + args.mapping + " > " + args.dir+'/alignment_unique.bed')
-        print >> sys.stderr, 'finished conversion'
-    os.system('samtools faidx '+args.assembly)
-    os.system('cut -f 1,2 '+ args.assembly+'.fai > '+args.dir+'/contig_length_new')
+    # if os.path.exists(args.dir+'/alignment_unique.bed') == False:
+    #     print >> sys.stderr, "convertng bam file to bed file"
+    #     os.system('bamToBed -i ' + args.mapping + " > " + args.dir+'/alignment_unique.bed')
+    #     print >> sys.stderr, 'finished conversion'
+    # os.system('samtools faidx '+args.assembly)
+    # os.system('cut -f 1,2 '+ args.assembly+'.fai > '+args.dir+'/contig_length_new')
 
     # print >> sys.stderr, 'finished conversion'
 
@@ -30,13 +30,13 @@ def main():
     if args.missassembly:
         print >> sys.stderr, 'started finding misassemblies'
         final_assembly = args.dir+'/cleaned.fa'
-        os.system('./break_contigs -a '+args.mapping +' -d ' + args.dir + ' -l ' + args.dir+'/contig_length_new')
+        os.system('./break_contigs -a '+args.dir+'/alignment_unique.bed' +' -d ' + args.dir + ' -l ' + args.dir+'/contig_length_new')
         os.system('python break_contigs.py -b '+args.dir+'/breakpoints' + ' -a ' + args.assembly + ' -l ' + args.dir+'/contig_length_new' + ' -o ' + final_assembly)
         print >> sys.stderr, 'finished detecting misassemblies'
 
 
     os.system('python RE_sites.py -a '+ final_assembly + ' > '+ args.dir + '/RE_counts')
-    os.system('python create_links1.py -m '+args.mapping + ' -c '+ args.dir+'/RE_counts' + ' -l ' + args.dir+'/contig_length_new > '+args.dir+'/new_links')
+    os.system('python create_links1.py -m '+args.dir+'/alignment_unique.bed' + ' -c '+ args.dir+'/RE_counts' + ' -l ' + args.dir+'/contig_length_new > '+args.dir+'/new_links')
     os.system('sort -k 3 -g -r '+args.dir+'/new_links > '+args.dir+'/new_links_sorted') 
     os.system('python links_to_graph3.py -a '+final_assembly+' -f '+args.dir+'/scaffolds.fasta'+' -l '+args.dir+'/new_links_sorted'+ ' -n '+args.dir+'/contig_length_new > '+args.dir+'/paths')
 

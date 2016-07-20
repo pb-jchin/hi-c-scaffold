@@ -24,7 +24,10 @@ id2seq = {}
 recs = []
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-c","--cleaned",help="cleaned assembly")
+    parser.add_argument("-a","--cleaned",help="cleaned assembly")
+    parser.add_argument("-f","--scaffold",help="final scaffold file")
+    parser.add_argument("-l","--links",help="links sorted by score")
+    parser.add_argument("-n","--length",help="contig length")
     args = parser.parse_args()
 
     input_handle = open(args.cleaned, "rU") 
@@ -87,14 +90,14 @@ def main():
 
                 return path
 
-    with open('contig_lengths_new','r') as f:
+    with open(args.length,'r') as f:
         lines = f.readlines()
         for line in lines:
             attrs = line.split()
             contig_length[attrs[0]] = long(attrs[-1])
 
     contigs = set()
-    with open("new_links_sorted",'r') as f:
+    with open(args.links,'r') as f:
         for row in f:
             row = row.strip().split()
             v1, v2 = row[0:2]
@@ -131,7 +134,7 @@ def main():
                 edgemap[key] +=  int(row[-1])
 
             if v1 not in existing_nodes and v2 not in existing_nodes:
-                if count < 200:
+                if count < 150:
                     continue
                 G.add_edge( v1, v2, score=score, t="x" )
                
@@ -404,7 +407,7 @@ def main():
             rec = SeqRecord(Seq(curr_contig,generic_dna),id='scaffold_'+str(c_id))
             recs.append(rec)
             c_id += 1
-    SeqIO.write(recs,'scaffolds_new_4.0.fasta','fasta')
+    SeqIO.write(recs,args.scaffold,'fasta')
 
 if __name__ == '__main__':
     main()

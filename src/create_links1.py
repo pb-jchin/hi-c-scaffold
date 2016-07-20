@@ -1,13 +1,13 @@
 import operator
 import math
-
+import sys
 import argparse
 
 contig_lengths = {}
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-m","--mapping", help="mapping of read to contigs in bam format")
-    parser.add_argument("-c",'--counts',help="RE countts")
+    parser.add_argument("-c",'--counts',help="RE counts")
     parser.add_argument("-l",'--contiglen',help="file containing length of contigs")
 
     args = parser.parse_args()
@@ -22,29 +22,33 @@ def main():
     coordinates_map = {}
     first_in_pair = {}
     second_in_pair = {}
-
+    print >> sys.stderr, 'bedfile started'
     with open(args.mapping,'r') as f:
-        lines = f.readlines()
-        for line in lines:
+        for line in f:
             attrs = line.split()
-            pos = (long(attrs[1]) + long(attrs[2]))/2.0
-            read = attrs[3]
-            if read[-1] == '1':
-                read = read[:-2]
-                rec = (attrs[0],pos)
-                first_in_pair[read] = rec
-            else:
-                read = read[:-2]
-                rec = (attrs[0],pos)
-                second_in_pair[read] = rec
+            try:
+                pos = (long(attrs[1]) + long(attrs[2]))/2.0
+                read = attrs[3]
+                if read[-1] == '1':
+                    read = read[:-2]
+                    rec = (attrs[0],pos)
+                    first_in_pair[read] = rec
+                else:
+                    read = read[:-2]
+                    rec = (attrs[0],pos)
+                    second_in_pair[read] = rec
+                #print >> sys.stderr, len(first_in_pair)
+            except:
+                continue
 
 
+    print >> sys.stderr, 'bedfile loaded'
     RF_counts_left = {}
     RF_counts_right = {}
 
     with open(args.counts,'r') as f:
-        lines = f.readlines()
-        for line in lines:
+        #lines = f.readlines()
+        for line in f:
             attrs = line.split()
             RF_counts_left[attrs[0]] = int(attrs[1])
             RF_counts_right[attrs[0]] = int(attrs[2])
@@ -58,6 +62,7 @@ def main():
             rec1 = first_in_pair[read]
             rec2 = second_in_pair[read]
             if rec1[0] != rec2[0]:
+                print >> sys.stderr, 'here'
                 len1 = contig_lengths[rec1[0]]
                 len2 = contig_lengths[rec2[0]]
                 pos1 = rec1[1]
@@ -83,6 +88,8 @@ def main():
                 if key not in contig_links:
                     contig_links[key] = 1
                 contig_links[key] += 1
+
+    #print len(contig_links)
 
     for key in contig_links:
         edge = key.split('$')
