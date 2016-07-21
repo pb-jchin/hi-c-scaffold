@@ -1,10 +1,7 @@
 import networkx as nx
 import operator
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
-from Bio.Alphabet import IUPAC
-from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
+from pbcore.io import FastaReader
+from pbcore.io import FastaWriter
 import argparse
 
 revcompl = lambda x: ''.join([{'A':'T','C':'G','G':'C','T':'A'}[B] for B in x][::-1])
@@ -30,12 +27,12 @@ def main():
     parser.add_argument("-n","--length",help="contig length")
     args = parser.parse_args()
 
-    input_handle = open(args.cleaned, "rU") 
+    f = FastaReader(args.cleaned)
 
-    for record in SeqIO.parse(input_handle, "fasta"):
-        id,seq = record.id, str(record.seq)
-        #print id
-        id2seq[id] = seq
+    for record in f:
+        id = record.id
+        print id
+        id2seq[id] = record.sequence[0:-10]
 
     def break_cycle(nodes):
         nodeset = set()
@@ -102,7 +99,7 @@ def main():
             row = row.strip().split()
             v1, v2 = row[0:2]
             score = float(row[-1])
-            count = float(row[4])
+            count = float(row[3])
             c1 = v1.split(":")[0]
             c2 = v2.split(":")[0]
             contigs.add(c1)
@@ -112,7 +109,7 @@ def main():
                 nodes_to_edges[c1] = []
             if c2 not in nodes_to_edges:
                 nodes_to_edges[c2] = []
-            nodes_to_edges[c1].append((v1,v2,float(row[4])))
+            nodes_to_edges[c1].append((v1,v2,float(row[3])))
             
             key =  c1+'$'+c2
             if count >= 60:
@@ -181,7 +178,7 @@ def main():
                     assigned[each.split(':')[0]] = False
             continue
         else:
-            path = nx.shortest_path(subg, p0[0], p0[1],weight='score')
+            path = nx.shortest_path(subg, p0[0], p0[1])
             if len(path) == 2:
                 to_merge.add(path[0].split(':')[0])
                 continue
@@ -386,6 +383,7 @@ def main():
     #         print backbone_paths[key1], backbone_paths[max_path], max_weight
 
     c_id = 1
+    writer = FastaWriter(args.scaffold)
     for key in backbone_paths:
         if len(backbone_paths[key]) >= 4:
             path = backbone_paths[key]
@@ -400,14 +398,16 @@ def main():
                 if curr[1] == 'B' and next[1] == 'E':
                     curr_contig += id2seq[curr[0]]
                 if curr[1] == 'E' and next[1] == 'B':
+                    #print id2seq[curr[0]]
                     curr_contig += revcompl(id2seq[curr[0]])
                 if i != len(path) - 2:
                     for j in range(0,500):
                         curr_contig += 'N'
-            rec = SeqRecord(Seq(curr_contig,generic_dna),id='scaffold_'+str(c_id))
-            recs.append(rec)
+            # rec = SeqRecord(Seq(curr_contig,generic_dna),id='scaffold_'+str(c_id))
+            # recs.append(rec)
+            print c_id
+            writer.writeRecord('scaffold_'+str(c_id),curr_contig)
             c_id += 1
-    SeqIO.write(recs,args.scaffold,'fasta')
 
 if __name__ == '__main__':
     main()
