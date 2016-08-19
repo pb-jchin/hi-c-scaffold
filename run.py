@@ -11,17 +11,17 @@ def main():
 
     args = parser.parse_args()
 
-    # if not os.path.exists(args.dir):
-    #     os.makedirs(args.dir)
+    if not os.path.exists(args.dir):
+        os.makedirs(args.dir)
 
-    # if os.path.exists(args.dir+'/alignment_unique.bed') == False:
-    #     print >> sys.stderr, "convertng bam file to bed file"
-    #     os.system('bamToBed -i ' + args.mapping + " > " + args.dir+'/alignment_unique.bed')
-    #     print >> sys.stderr, 'finished conversion'
-    # os.system('samtools faidx '+args.assembly)
-    # os.system('cut -f 1,2 '+ args.assembly+'.fai > '+args.dir+'/contig_length_new')
+    if os.path.exists(args.dir+'/alignment_unique.bed') == False:
+        print >> sys.stderr, "convertng bam file to bed file"
+        os.system('bamToBed -i ' + args.mapping + " > " + args.dir+'/alignment_unique.bed')
+        print >> sys.stderr, 'finished conversion'
+    os.system('samtools faidx '+args.assembly)
+    os.system('cut -f 1,2 '+ args.assembly+'.fai > '+args.dir+'/contig_length_new')
 
-    # print >> sys.stderr, 'finished conversion'
+    print >> sys.stderr, 'finished conversion'
 
     final_assembly = args.assembly
     final_mapping = args.mapping
