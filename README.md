@@ -6,6 +6,8 @@ This code is used to scaffold your assemblies using Hi-C data. To use the code f
   make
 ```
 
+To run the code, you will need [Samtools](http://samtools.sourceforge.net), [Bedtools](http://bedtools.readthedocs.io/en/latest/), [pbcore](https://github.com/PacificBiosciences/pbcore) and [Networkx](https://networkx.github.io/).
+
 After this, there will be two binary files generated, one for ```break_contigs.cpp``` and one for ```triangle_plot.cpp```. Now you can run the code as follows:
 
 The primary file to run the pipeline is run.py which has following options
