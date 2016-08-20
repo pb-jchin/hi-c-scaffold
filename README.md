@@ -1,5 +1,7 @@
 # Hi-C Scaffold
-## (This work is sponsored by Pacific Biosciences, Menlo Park)
+This work is intial forked from https://github.com/machinegun/hi-c-scaffold.
+
+It is develoepd by Jay Ghurye, currently a graduate student from University of Maryland ( http://www.cbcb.umd.edu/~jayg/ ). The work is sponsored by Pacific Biosciences, Menlo Park
 
 This code is used to scaffold your assemblies using Hi-C data. To use the code first run the following command:
 ```
