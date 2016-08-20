@@ -1,5 +1,5 @@
 # Hi-C Scaffold
-This work is intial forked from https://github.com/machinegun/hi-c-scaffold.
+This work is intially forked from https://github.com/machinegun/hi-c-scaffold.
 
 It is develoepd by Jay Ghurye, currently a graduate student from University of Maryland (http://www.cbcb.umd.edu/~jayg/). The work is sponsored by Pacific Biosciences, Menlo Park
 
